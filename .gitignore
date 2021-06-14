@@ -1,0 +1,2 @@
+# La linea de abajo ignora todas las carpetas llamadas "node_modules" en cualquier posible subdirecotrio
+node_modules/
