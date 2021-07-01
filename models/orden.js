@@ -69,6 +69,10 @@ const ordenSchema = mongoose.Schema({
         alias: String,
     // },
     nota: String,
+    fav_status:{
+        type: Number,
+        default: 0
+    },
     fecha_entrega: { 
         type: Date,
         default: null

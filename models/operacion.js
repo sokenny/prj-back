@@ -19,6 +19,10 @@ const operacionSchema = mongoose.Schema({
     comision_proveedor: Number,
     comision_prj: Number,
     monto_a_entregar: Number,
+    fav_status:{
+        type: Number,
+        default: 0
+    },
     // ordenes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: true }],
     estado: String,
     notas: String,

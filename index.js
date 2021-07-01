@@ -10,6 +10,7 @@ import proveedoresRoutes from './routes/proveedores.js'
 import cuentasRoutes from './routes/cuentas.js'
 import ordenesRoutes from './routes/ordenes.js'
 import movimientosRoutes from './routes/movimientos.js'
+import globalesRoutes from './routes/globales.js'
 
 const app = express()
 
@@ -25,6 +26,7 @@ app.use('/proveedores', proveedoresRoutes)
 app.use('/cuentas', cuentasRoutes)
 app.use('/ordenes', ordenesRoutes)
 app.use('/movimientos', movimientosRoutes)
+app.use('/globales', globalesRoutes)
 
 const CONNECTION_URL = 'mongodb://juanchaher:juanchaher123@cluster0-shard-00-00.67rpn.mongodb.net:27017,cluster0-shard-00-01.67rpn.mongodb.net:27017,cluster0-shard-00-02.67rpn.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-74rwgc-shard-0&authSource=admin&retryWrites=true&w=majority'
 const PORT = process.env.PORT || 5000

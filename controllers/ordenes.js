@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import Orden from '../models/orden.js';
 
 export const getOrdenes = async (req, res)=>{
-    console.log('controller getOrdenes')
+    console.log('controller getOrdenes', req)
     try{
         
         var ordenes = await Orden.find().populate('cliente').exec()
@@ -13,6 +13,12 @@ export const getOrdenes = async (req, res)=>{
         res.status(404).json({message: error.message})
     }
 }
+
+export const getOrdenesHoy = async (req, res)=>{
+}
+
+
+
 // export const createOrden = async(req, res) =>{
 
 //     const operacion = req.body.operacionData;

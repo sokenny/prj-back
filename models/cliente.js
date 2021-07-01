@@ -13,6 +13,10 @@ const clienteSchema = mongoose.Schema({
     tipo_cuenta: String,
     cbu: Number,
     alias: String,
+    fav_status:{
+        type: Number,
+        default: 0
+    },
     fecha_creado: {
         type: Date,
         default: new Date()
