@@ -1,4 +1,31 @@
 import mongoose from 'mongoose'
+var Schema = mongoose.Schema;
+
+const factura = new Schema({
+    forma_de_pago: String,
+    monto_factura_ars: Number,
+    monto_factura_usd: Number,
+    monto_factura_ars_comision: Number,
+    monto_factura_usd_comision: Number,
+    cambio_nuestro: Number,
+    cambio_cliente: Number,
+    comision: Number,
+    proveedor: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },
+    
+});
+
+const cash = new Schema({
+    comision: Number,
+    monto_cliente: Number,
+    monto_envio: Number,
+    proveedor: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },    
+});
+
+
+const tipo_orden = new Schema({
+    factura: factura,
+    cash: cash    
+});
 
 const ordenSchema = mongoose.Schema({
 
@@ -34,7 +61,6 @@ const ordenSchema = mongoose.Schema({
     cliente : { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Clientes',
-        required: true 
     },
 
     a_entregar: {
@@ -46,7 +72,11 @@ const ordenSchema = mongoose.Schema({
     usd: Number,
 
     tipo: String,
-    estado: Number,
+    estado: { type: String},
+
+    // Dentro de este objeto, van objetos con los campos propios de cada tipo de orden
+    tipo_orden: tipo_orden,
+    
 
     // envio:{
         encargado: String,

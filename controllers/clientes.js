@@ -3,10 +3,25 @@ import Cliente from '../models/cliente.js';
 
 export const getClientes = async (req, res)=>{
     console.log('controller getClientes')
+    
+    const query = req.query
+    const periodo = JSON.parse(query.periodo)
+    var tipo =  query.tipo;
+    if(query.tipo === ''){
+        tipo = {
+            $exists: true
+        }
+    }
+    
     try{
-
-        const clientes = await Cliente.find();
-        
+        const clientes = await Cliente.find({
+                                            origen: tipo,
+                                            fecha_creado:{
+                                                $gte: periodo.from,
+                                                $lt: periodo.to
+                                            }
+                                        });
+                                        
         console.log('cls: ', clientes);
         res.status(200).json(clientes)
     }catch(error){
@@ -38,5 +53,26 @@ export const deleteCliente = async (req, res)=>{
     await Cliente.findByIdAndRemove(id)
     
     res.json({message: 'Cliente deleted succesfully', id: id})
+
+}
+
+export const updateCliente = async (req, res) =>{
+
+    const cliente = req.body;
+    const filter = {_id: cliente._id}
+    console.log('cliente DESDE SERVER: ', cliente)
+
+
+    var clienteToUpdate = await Cliente.findOneAndUpdate(filter, cliente, {new: true})
+
+    console.log('cliente actualizada desde el controlador: ', clienteToUpdate)
+
+    try{            
+                
+        res.status(201).json(clienteToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
 
 }

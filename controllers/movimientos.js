@@ -33,9 +33,11 @@ export const createMovimientoProveedor = async(req, res) =>{
     var newMovimiento = new Movimiento(movimientoProveedor);
     
     try{
-        await newMovimiento.save()
+
+        await newMovimiento.save().then(m => m.populate('proveedor').execPopulate())
+
+        res.status(201).json(newMovimiento)       
         
-        res.status(201).json({newMovimiento})
     }catch(error){
         console.log(error)
         res.status(409).json({message: error.message})
@@ -95,4 +97,48 @@ export const deleteMovimientoCaja = async (req, res)=>{
     
     res.json({message: 'Movimiento proveedor deleted succesfully', id: id})
     
+}
+
+
+export const updateMovimientoProveedor = async (req, res) =>{
+
+    const movimiento = req.body;
+    const filter = {_id: movimiento._id}
+    console.log('movimiento DESDE SERVER: ', movimiento)
+
+
+    var movimientoToUpdate = await Movimiento.findOneAndUpdate(filter, movimiento, {new: true}).populate('proveedor').exec()
+
+    console.log('movimiento actualizada desde el controlador: ', movimientoToUpdate)
+
+    try{            
+                
+        res.status(201).json(movimientoToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
+
+}
+
+
+export const updateMovimientoCaja = async (req, res) =>{
+
+    const movimiento = req.body;
+    const filter = {_id: movimiento._id}
+    console.log('movimiento DESDE SERVER: ', movimiento)
+
+
+    var movimientoToUpdate = await MovimientoCaja.findOneAndUpdate(filter, movimiento, {new: true})
+
+    console.log('movimiento actualizado desde el controlador: ', movimientoToUpdate)
+
+    try{            
+                
+        res.status(201).json(movimientoToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
+
 }

@@ -24,8 +24,11 @@ const operacionSchema = mongoose.Schema({
         default: 0
     },
     // ordenes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: true }],
+    cambio_cliente: Number,
+    ganancia_prj : Number,
+    spread: Number,
     estado: String,
-    notas: String,
+    nota: String,
     fecha_creado: {
         type: Date,
         default: new Date()

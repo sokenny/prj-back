@@ -4,13 +4,28 @@ import Orden from '../models/orden.js';
 import Movimiento from '../models/movimiento.js';
 
 export const getOperaciones = async (req, res)=>{
-    console.log('llegamos al controlador de operaciones')
+
+    const query = req.query
+    const periodo = JSON.parse(query.periodo)
+
+    var tipo =  query.tipo;
+    if(query.tipo === ''){
+        tipo = {
+            $exists: true
+            }
+    }
+
     try{
 
-        var operaciones = await Operacion.find().populate('cliente').populate('proveedor').populate('cuenta_destino').exec()
+        var operaciones = await Operacion.find({
+                                                tipo_operacion: tipo,
+                                                fecha_creado:{
+                                                    $gte: periodo.from,
+                                                    $lt: periodo.to
+                                                }
+                                            }).populate('cliente').populate('proveedor').populate('cuenta_destino').exec()
         
 
-        console.log('ops', operaciones);
         res.status(200).json(operaciones)
         
     }catch(error){
@@ -25,7 +40,6 @@ export const getClienteOperaciones = async (req, res)=>{
     try{
         const clienteOperaciones = await Operacion.find({id_cliente: id});
         
-        console.log(clienteOperaciones);
         res.status(200).json(clienteOperaciones)
     }catch(error){
         res.status(404).json({message: error.message})
@@ -48,6 +62,17 @@ export const createOperacion = async(req, res) =>{
             for (let i = 0; i < ordenes.length; i++) {
                     
                     var orden = ordenes[i];
+                    orden.tipo_orden = {}
+
+                    if(orden.tipo == 'Factura'){
+
+                        orden.tipo_orden.factura = {
+                            monto_factura_usd: orden.usd,
+                            monto_factura_ars: orden.ars,
+                        }
+
+                    }
+
                     // orden.fecha_entrega = new Date(orden.fecha_entrega)
                     console.log('lafechaentrega: ', orden.fecha_entrega)
                     orden.operacion = newOperacion._id
