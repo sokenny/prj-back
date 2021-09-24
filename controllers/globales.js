@@ -35,12 +35,12 @@ export const changeEstado = async(req, res) =>{
 
     const data = req.body;
     // const newPost = new PostMessage(post);
-    console.log('ChangeEstado DESDE CONTROLLER: ', data.value)
+    console.log('ChangeEstado DESDE CONTROLLER: ', data)
 
     try{
         if(data.tipo == 'operaciones'){
             await Operacion.findByIdAndUpdate(data.id, {estado: data.value});
-        }else if(data.tipo == 'ordenes' || data.tipo == 'ordenes de hoy' || data.tipo == 'operaciones sin órdenes'){
+        }else if(data.tipo == 'ordenes' || data.tipo == 'ordenes de hoy' || data.tipo == 'operaciones sin órdenes' || data.tipo == 'depositos'){
             // await Operacion.findByIdAndUpdate(data.id, {estado: data.value});
             console.log(data.value)
             await Orden.findByIdAndUpdate(data.id, {estado: data.value} );

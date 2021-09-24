@@ -6,7 +6,7 @@ export const getMovimientos = async (req, res)=>{
     console.log('controller getMovimientos')
     try{
 
-        const movimientos = await Movimiento.find().populate('proveedor').populate('cuenta_destino').exec();
+        const movimientos = await Movimiento.find().populate('proveedor').populate('cuenta_destino').sort({fecha_creado: 'desc'}).exec();
         
         console.log('mvs: ', movimientos);
         res.status(200).json(movimientos)
@@ -78,7 +78,7 @@ export const createMovimientoCaja = async(req, res) =>{
 export const getMovimientosCajas = async (req, res)=>{
     try{
         
-        const movimientosCajas = await MovimientoCaja.find();
+        const movimientosCajas = await MovimientoCaja.find().sort({fecha_creado: 'desc'});
         
         console.log('mvs: ', movimientosCajas);
         res.status(200).json(movimientosCajas)

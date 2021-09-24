@@ -33,7 +33,7 @@ export const getOrdenes = async (req, res)=>{
                                             $gte: periodo.from,
                                             $lt: periodo.to
                                         }
-                                    }).populate('cliente').populate('operacion').populate(populate_proveedor).exec()
+                                    }).populate('cliente').populate('operacion').populate(populate_proveedor).sort({fecha_creado: 'desc'}).exec()
         
         res.status(200).json(ordenes)
     }catch(error){
@@ -93,7 +93,7 @@ export const createOrdenSolo = async (req, res) =>{
         for (let i = 0; i < ordenes.length; i++) {
                 var orden = ordenes[i];
                 // orden.operacion = newOperacion._id
-
+                console.log('se va a crear: ', orden)
                 var newOrden = new Orden(orden)
                 
                 try{
@@ -219,5 +219,27 @@ export const updateCash = async (req, res) =>{
     }catch(error){
         res.status(409).json({message: error.message})
     }
+
+}
+
+export const setListas = async (req, res) =>{
+
+    const ordenes = req.body;
+    console.log('ordenes desde controller setlistas: ', ordenes)
+
+    let idsArray = []
+
+    for(let o in ordenes){
+        idsArray.push(ordenes[o]._id)
+    }
+
+    let filter = {_id: {$in: idsArray}}
+
+    var updatedOrdenes = await Orden.updateMany(filter, {lista: true}, {new: true}).populate('cliente').populate('operacion').populate('tipo_orden.cash.proveedor').exec()
+
+    res.status(201).json(idsArray)
+
+    console.log('updated listas ords: ', updatedOrdenes)
+
 
 }

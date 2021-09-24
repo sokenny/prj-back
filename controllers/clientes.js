@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Cliente from '../models/cliente.js';
 
+
 export const getClientes = async (req, res)=>{
     console.log('controller getClientes')
     
@@ -20,9 +21,8 @@ export const getClientes = async (req, res)=>{
                                                 $gte: periodo.from,
                                                 $lt: periodo.to
                                             }
-                                        });
+                                        }).sort({fecha_creado: 'desc'});
                                         
-        console.log('cls: ', clientes);
         res.status(200).json(clientes)
     }catch(error){
         res.status(404).json({message: error.message})

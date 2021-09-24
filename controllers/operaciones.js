@@ -23,10 +23,35 @@ export const getOperaciones = async (req, res)=>{
                                                     $gte: periodo.from,
                                                     $lt: periodo.to
                                                 }
-                                            }).populate('cliente').populate('proveedor').populate('cuenta_destino').exec()
+                                            }).populate('cliente').populate('proveedor').populate('cuenta_destino').sort({fecha_creado: 'desc'}).exec()
         
 
         res.status(200).json(operaciones)
+        
+    }catch(error){
+        res.status(404).json({message: error.message})
+    }
+}
+
+export const hasOrden = async (req, res)=>{
+
+    const id = req.params.id;
+
+    try{
+
+        var ordenesAsociadas = await Orden.find({
+                                                operacion: id,
+                                            }).exec()
+
+        if(ordenesAsociadas.length>0){
+            console.log('Hay ordenes asociadas!')
+            res.status(200).json({error: 0, hasOrden: true})
+        }else{
+            console.log('Noo hay ordenes asociadas!')
+            res.status(200).json({error: 0, hasOrden: false})
+        }       
+
+        // res.status(200).json(operaciones)
         
     }catch(error){
         res.status(404).json({message: error.message})
@@ -38,7 +63,7 @@ export const getClienteOperaciones = async (req, res)=>{
     const {id} = req.params;
 
     try{
-        const clienteOperaciones = await Operacion.find({id_cliente: id});
+        const clienteOperaciones = await Operacion.find({id_cliente: id}).sort({fecha_creado: 'desc'}).exec();
         
         res.status(200).json(clienteOperaciones)
     }catch(error){
@@ -53,10 +78,8 @@ export const createOperacion = async(req, res) =>{
     const ordenes = req.body.entregas;
     const newOperacion = new Operacion(operacion);
 
-    console.log('REQBODY DESDE SERVER: ', req.body)
-
     try{
-        await newOperacion.save().then(() => {
+        await newOperacion.save().then(o => o.populate('cliente').execPopulate()).then(() => {
             
             // Creamos las ordenes
             for (let i = 0; i < ordenes.length; i++) {
@@ -97,7 +120,7 @@ export const createOperacion = async(req, res) =>{
                     const operacionSubida = {cliente:newOperacion.cliente_recibe, monto_enviado: newOperacion.monto_llega, tipo_operacion: 'Subida', estado:'Pendiente'}
                     const newOperacionSubida = new Operacion(operacionSubida);
                     try{
-                        newOperacionSubida.save()
+                        newOperacionSubida.save().then(o => o.populate('cliente').execPopulate())
                     }catch(error){
                         console.log('error al crear operacion subida: ', error)
                     }
@@ -119,6 +142,8 @@ export const createOperacion = async(req, res) =>{
             
 
         });
+
+        console.log('new operacion: ', newOperacion)
         res.status(201).json({newOperacion, ordenes})
     }catch(error){
         console.log('errorsete: ', error)
@@ -138,5 +163,79 @@ export const deleteOperacion = async (req, res)=>{
     await Operacion.findByIdAndRemove(id)
     
     res.json({message: 'Operacion deleted succesfully', id: id})
+
+}
+
+export const updateBajada = async (req, res) =>{
+
+    const bajada = req.body;
+    const filter = {_id: bajada._id}
+    
+    console.log('Bajada que llega al server: ', bajada)
+
+    var bajadaToUpdate = await Operacion.findOneAndUpdate(filter, bajada, {new: true}).populate('proveedor').populate('cuenta_destino').populate('cliente').exec()
+
+    console.log('bajada actualizado desde el controlador: ', bajadaToUpdate)
+
+    try{            
+                
+        res.status(201).json(bajadaToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
+
+}
+
+export const updateSubida = async (req, res) =>{
+
+    const subida = req.body;
+    const filter = {_id: subida._id}
+    
+    var subidaToUpdate = await Operacion.findOneAndUpdate(filter, subida, {new: true}).populate('proveedor').populate('cuenta_destino').populate('cliente').exec()
+
+    try{            
+                
+        res.status(201).json(subidaToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
+
+}
+
+export const updateCrypto = async (req, res) =>{
+
+    const crypto = req.body;
+    const filter = {_id: crypto._id}
+    
+    var cryptoToUpdate = await Operacion.findOneAndUpdate(filter, crypto, {new: true}).populate('proveedor').populate('cuenta_destino').populate('cliente').exec()
+
+    try{            
+                
+        res.status(201).json(cryptoToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
+
+}
+
+export const updateCambio = async (req, res) =>{
+
+    console.log('acasi')
+
+    const cambio = req.body;
+    const filter = {_id: cambio._id}
+    
+    var cambioToUpdate = await Operacion.findOneAndUpdate(filter, cambio, {new: true}).populate('proveedor').populate('cuenta_destino').populate('cliente').exec()
+
+    try{            
+                
+        res.status(201).json(cambioToUpdate)
+            
+    }catch(error){
+        res.status(409).json({message: error.message})
+    }
 
 }

@@ -5,6 +5,8 @@ const operacionSchema = mongoose.Schema({
     cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'Clientes', required: false },
     cliente_borrador: String,
     tipo_operacion: String,
+    tipo_envia: String,
+    operacion_crypto: String,
     tipo_cambio: String,
     monto_enviado: Number,
     cambio_prj: Number,

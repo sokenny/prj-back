@@ -7,6 +7,7 @@ const movimientoCajaSchema = mongoose.Schema({
     categoria: String,
     tipo: {type: Number, min: 0, max: 1},
     caja:String,
+    oficina:String,
     fav_status:{
         type: Number,
         default: 0

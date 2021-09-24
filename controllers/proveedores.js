@@ -4,7 +4,7 @@ import Cuenta from '../models/cuenta.js';
 
 export const getProveedores = async (req, res)=>{
     try{
-        const proveedores = await Proveedor.find();
+        const proveedores = await Proveedor.find().sort({fecha_creado: 'desc'});
         
         console.log('ops', proveedores);
         res.status(200).json(proveedores)

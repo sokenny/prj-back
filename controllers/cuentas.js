@@ -4,7 +4,7 @@ import Cuenta from '../models/cuenta.js';
 export const getCuentas = async (req, res)=>{
     try{
 
-        const cuentas = await Cuenta.find().populate('proveedor').exec();
+        const cuentas = await Cuenta.find().populate('proveedor').sort({fecha_creado: 'desc'}).exec();
         
         res.status(200).json(cuentas)
     }catch(error){

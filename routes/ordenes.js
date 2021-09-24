@@ -1,10 +1,11 @@
 import express from 'express'
 
-import { getOrdenes, createOrdenSolo, createFactura, updateFactura, deleteOrden, getOrdenesHoy, createCash, updateCash } from '../controllers/ordenes.js'
+import { getOrdenes, createOrdenSolo, createFactura, updateFactura, deleteOrden, getOrdenesHoy, createCash, updateCash, setListas } from '../controllers/ordenes.js'
 
 const router = express.Router()
 console.log('routes ordenes')
 router.get('/', getOrdenes)
+router.patch('/listas', setListas)
 // router.get('/hoy', getOrdenesHoy)
 // router.post('/', createOrden)
 router.post('/', createOrdenSolo)

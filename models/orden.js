@@ -58,6 +58,7 @@ const ordenSchema = mongoose.Schema({
         ref: 'Operaciones',
         default: null
     },
+
     cliente : { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Clientes',
@@ -111,6 +112,7 @@ const ordenSchema = mongoose.Schema({
         type: Date,
         default: new Date()
     },
+    lista: Boolean,
     encargado: String
 
 })
