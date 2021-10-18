@@ -17,6 +17,7 @@ const clienteSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     fecha_creado: {
         type: Date,
         default: new Date()

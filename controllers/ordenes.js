@@ -5,7 +5,6 @@ import Movimiento from '../models/movimiento.js';
 export const getOrdenes = async (req, res)=>{
 
     const query = req.query
-
     const periodo = JSON.parse(query.periodo)
 
     var tipo =  query.tipo;
@@ -33,7 +32,7 @@ export const getOrdenes = async (req, res)=>{
                                             $gte: periodo.from,
                                             $lt: periodo.to
                                         }
-                                    }).populate('cliente').populate('operacion').populate(populate_proveedor).sort({fecha_creado: 'desc'}).exec()
+                                    }).populate('cliente').populate('operacion').populate('operador').populate(populate_proveedor).sort({fecha_creado: 'desc'}).exec()
         
         res.status(200).json(ordenes)
     }catch(error){
@@ -92,6 +91,7 @@ export const createOrdenSolo = async (req, res) =>{
         // Creamos las ordenes
         for (let i = 0; i < ordenes.length; i++) {
                 var orden = ordenes[i];
+                orden.operador = req.operador
                 // orden.operacion = newOperacion._id
                 console.log('se va a crear: ', orden)
                 var newOrden = new Orden(orden)
@@ -113,7 +113,7 @@ export const createOrdenSolo = async (req, res) =>{
 
 
 export const createFactura = async (req, res) =>{
-
+    req.body.factura.operador = req.operador
     const factura = req.body.factura;
 
     var newFactura = new Orden(factura)
@@ -164,7 +164,7 @@ export const deleteOrden = async (req, res)=>{
 }
 
 export const createCash = async (req, res) =>{
-
+    req.body.cash.operador = req.operador
     const cash = req.body.cash;
 
     var newCash = new Orden(cash)

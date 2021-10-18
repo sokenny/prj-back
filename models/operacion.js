@@ -1,11 +1,17 @@
 import mongoose from 'mongoose'
 
+import moment from 'moment-timezone'
+const currentLocalDate = moment.tz(Date.now(), "America/Argentina/Buenos_Aires");
+
+console.log('Current local!', currentLocalDate)
+
 const operacionSchema = mongoose.Schema({
 
     cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'Clientes', required: false },
     cliente_borrador: String,
     tipo_operacion: String,
     tipo_envia: String,
+    corroborar: {type: Boolean, default: false},
     operacion_crypto: String,
     tipo_cambio: String,
     monto_enviado: Number,
@@ -20,6 +26,7 @@ const operacionSchema = mongoose.Schema({
     cuenta_destino: { type: mongoose.Schema.Types.ObjectId, ref: 'Cuentas', required: false },
     comision_proveedor: Number,
     comision_prj: Number,
+    comision_prj_cantidad: Number,
     monto_a_entregar: Number,
     fav_status:{
         type: Number,
@@ -31,9 +38,10 @@ const operacionSchema = mongoose.Schema({
     spread: Number,
     estado: String,
     nota: String,
+    operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     fecha_creado: {
         type: Date,
-        default: new Date()
+        default: currentLocalDate
     }
 
 })

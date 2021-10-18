@@ -23,7 +23,7 @@ export const getOperaciones = async (req, res)=>{
                                                     $gte: periodo.from,
                                                     $lt: periodo.to
                                                 }
-                                            }).populate('cliente').populate('proveedor').populate('cuenta_destino').sort({fecha_creado: 'desc'}).exec()
+                                            }).populate('cliente').populate('proveedor').populate('cuenta_destino').populate('operador').sort({fecha_creado: 'desc'}).exec()
         
 
         res.status(200).json(operaciones)
@@ -73,19 +73,30 @@ export const getClienteOperaciones = async (req, res)=>{
 
 
 export const createOperacion = async(req, res) =>{
-
+    
+    req.body.operacionData.operador = req.operador
     const operacion = req.body.operacionData;
     const ordenes = req.body.entregas;
     const newOperacion = new Operacion(operacion);
 
     try{
-        await newOperacion.save().then(o => o.populate('cliente').execPopulate()).then(() => {
+        await newOperacion.save().then(o => o.populate('cliente').execPopulate()).then(async () => {
             
             // Creamos las ordenes
             for (let i = 0; i < ordenes.length; i++) {
-                    
-                    var orden = ordenes[i];
+
+                    let orden = ordenes[i];
                     orden.tipo_orden = {}
+                    console.log('ordena  crear: ', orden)
+
+                    // Si la orden es de tipo moto y tiene pesos asociados, le creamos un cambio
+                    if(orden.tipo === 'Moto' && orden.ars > 0){
+
+                        let cambio = {cliente: operacion?.cliente, cliente_borrador: operacion?.cliente_borrador, tipo_operacion: 'Cambio', tipo_cambio: 'Venta', monto_enviado: orden.ars, monto_llega: orden.ars, cambio_cliente: null, cambio_prj: req.body.cambio_global, operador: req.operador, estado: 'Pendiente'}
+                        let newCambio = await new Operacion(cambio).save()
+                        console.log('Nuevo cambio creado: ', newCambio)
+
+                    }
 
                     if(orden.tipo == 'Factura'){
 
@@ -96,8 +107,6 @@ export const createOperacion = async(req, res) =>{
 
                     }
 
-                    // orden.fecha_entrega = new Date(orden.fecha_entrega)
-                    console.log('lafechaentrega: ', orden.fecha_entrega)
                     orden.operacion = newOperacion._id
                     var newOrden = new Orden(orden)
                     
@@ -128,7 +137,7 @@ export const createOperacion = async(req, res) =>{
                 // Si la operacion de tipo Bajada la recibe un proveedor, creamos el movimiento
                 }else if(newOperacion.tipo_recibe == 'Proveedor'){
 
-                    const movimiento = {proveedor: newOperacion.proveedor, cuenta_destino: newOperacion.cuenta_destino, importe: newOperacion.monto_llega, origen: newOperacion.cuenta_origen + ' ('+newOperacion.tipo_operacion+')', comision: newOperacion.comision_proveedor, estado: 'Enviado'}
+                    const movimiento = {proveedor: newOperacion.proveedor, cuenta_destino: newOperacion.cuenta_destino, operacion: newOperacion._id, importe: newOperacion.monto_llega, origen: newOperacion.cuenta_origen + ' ('+newOperacion.tipo_operacion+')', comision: newOperacion.comision_proveedor, estado: 'Enviado'}
                     const newMovimiento = new Movimiento(movimiento);
                     try{
                         newMovimiento.save();
@@ -136,6 +145,23 @@ export const createOperacion = async(req, res) =>{
                         console.log('Error al crear movimiento : ', error)
                     }
 
+                }
+
+                // Si tenía "transferencia" como forma de pago, creamos un movimiento al proveedor asociado a esa transferencia
+                if(operacion.recibe_transferencia){
+                    let proveedor_transferencia = JSON.parse(operacion.proveedor_transferencia)
+                    let importe;
+                    // Por ahora hardcodeamos cambio proveedor hasta definir si es algo que se configura dentro del proveedor
+                    let cambio_proveedor = 150;
+                    proveedor_transferencia.divisa === 'ARS' ? importe = -Math.round(operacion.monto_a_entregar * cambio_proveedor) : importe = -operacion.monto_a_entregar
+                    
+                    let movimientoProveedor = {proveedor: proveedor_transferencia._id, importe, estado: 'Enviado', comision: 0}
+                    const newMovimiento = new Movimiento(movimientoProveedor);
+                    try{
+                        newMovimiento.save().then(()=>console.log('Movimiento proveedor creado con exito.'));
+                    }catch(error){
+                        console.log('Error al crear movimiento : ', error)
+                    }
                 }
 
             }

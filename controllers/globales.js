@@ -39,19 +39,25 @@ export const changeEstado = async(req, res) =>{
 
     try{
         if(data.tipo == 'operaciones'){
-            await Operacion.findByIdAndUpdate(data.id, {estado: data.value});
+            await Operacion.findByIdAndUpdate(data.row_data._id, {estado: data.value});
         }else if(data.tipo == 'ordenes' || data.tipo == 'ordenes de hoy' || data.tipo == 'operaciones sin órdenes' || data.tipo == 'depositos'){
-            // await Operacion.findByIdAndUpdate(data.id, {estado: data.value});
+            // await Operacion.findByIdAndUpdate(data.row_data._id, {estado: data.value});
             console.log(data.value)
-            await Orden.findByIdAndUpdate(data.id, {estado: data.value} );
+            await Orden.findByIdAndUpdate(data.row_data._id, {estado: data.value} );
 
         }else if(data.tipo == 'clientes'){
             console.log('llegamos al if de clientes :P xd')
-            // await Cliente.findByIdAndUpdate(data.id, {fav_status: data.fav_status});
+            // await Cliente.findByIdAndUpdate(data.row_data._id, {fav_status: data.fav_status});
         }else if(data.tipo == 'facturas' || data.tipo == 'cash'){
-            await Orden.findByIdAndUpdate(data.id, {estado: data.value});
+            await Orden.findByIdAndUpdate(data.row_data._id, {estado: data.value});
         }else if(data.tipo == 'proveedores'){
-            await Movimiento.findByIdAndUpdate(data.id, {estado: data.value});
+
+            // Actualizamos el estado de la operacion que pueda tener asociada, a "Confirmado"
+            await Movimiento.findByIdAndUpdate(data.row_data._id, {estado: data.value})
+            if(data.row_data.operacion && data.value === 'Acreditado'){
+                await Operacion.findByIdAndUpdate(data .row_data.operacion, {estado: 'Confirmado', corroborar: false})
+            }
+
         }
         res.status(201).json()
     }catch(error){

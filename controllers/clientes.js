@@ -30,7 +30,7 @@ export const getClientes = async (req, res)=>{
 }
 
 export const createCliente = async(req, res) =>{
-
+    req.body.clienteData.operador = req.operador
     const cliente = req.body.clienteData;
     const newCliente = new Cliente(cliente);
 

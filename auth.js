@@ -10,6 +10,7 @@ export const verifyToken = (req, res, next) =>{
         const bearerToken = bearerHeader.split(" ")[1]
         req.token = bearerToken
         jwt.verify(req.token, 'secretkey', (error, authData)=>{
+
             if(error){
                 
                 res.json({error: "auth failed"})
@@ -17,9 +18,8 @@ export const verifyToken = (req, res, next) =>{
                   
                 }else{
 
-
+                    req.operador = authData.user[0]._id
                     next()
-                    
                     
                 }
             })

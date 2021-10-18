@@ -73,6 +73,7 @@ const ordenSchema = mongoose.Schema({
     usd: Number,
 
     tipo: String,
+    oficina: String,
     estado: { type: String},
 
     // Dentro de este objeto, van objetos con los campos propios de cada tipo de orden
@@ -108,6 +109,7 @@ const ordenSchema = mongoose.Schema({
         type: Date,
         default: null
     },
+    operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     fecha_creado: {
         type: Date,
         default: new Date()

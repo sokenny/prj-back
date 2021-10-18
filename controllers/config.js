@@ -33,7 +33,7 @@ export const updateConfig = async (req, res) =>{
 
 export const getCambioDia = async (req, res, return_res=true) => {
 
-    let cambios = await Operacion.find({tipo_operacion: 'Cambio', tipo_cambio: 'Compra', fecha_creado:{$gte: '2021-01-14',$lt: '2021-09-25'}})
+    let cambios = await Operacion.find({tipo_operacion: 'Cambio', tipo_cambio: 'Compra', fecha_creado:{$gte: '2021-01-14',$lt: '2021-11-25'}})
     cambios = []
 
     let ayer_00 = new Date();

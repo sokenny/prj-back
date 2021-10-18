@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Movimiento from '../models/movimiento.js';
 import MovimientoCaja from '../models/movimiento_caja.js';
+import {Parser} from 'json2csv';
 
 export const getMovimientos = async (req, res)=>{
     console.log('controller getMovimientos')
@@ -140,5 +141,60 @@ export const updateMovimientoCaja = async (req, res) =>{
     }catch(error){
         res.status(409).json({message: error.message})
     }
+
+}
+
+export const exportMovimientosCajas = async (req,res) =>{
+
+    // Acá después hay que hacer que reciba un rango de fechas :P
+    console.log('Llegamos al controlador exportMovimientosCajas')
+    let filtros = req.query;
+
+    const movimientosCajas = await MovimientoCaja.find(filtros).sort({fecha_creado: 'desc'});
+    
+    // Agregandole un "-" a los importes de tipo "0" (egresos)
+    let data = []
+    for(let mov of movimientosCajas){
+        if(mov.tipo === 0){
+            mov.importe = -mov.importe
+        }
+        data.push(mov)
+    }
+
+    const fields = [
+        {
+            label: 'Fecha creado',
+            value: 'fecha_creado'
+        }, 
+        {
+            label: 'Caja',
+            value: 'caja'
+        },
+        {
+            label: 'Importe',
+            value: 'importe'
+        },
+        {
+            label: 'Oficina',
+            value: 'oficina'
+        },
+        {
+            label: 'Categoria',
+            value: 'categoria'
+        },
+    ]
+
+    const json2csv = new Parser({ fields: fields })
+
+    try {
+        const csv = json2csv.parse(data)
+        res.attachment('data.csv')
+        res.status(200).send(csv)
+    } catch (error) {
+        console.log('error:', error.message)
+        res.status(500).send(error.message)
+    }
+
+
 
 }

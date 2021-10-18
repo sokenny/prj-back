@@ -378,6 +378,8 @@ export const getCierre = async (req,res) =>{
     const query = req.query
     const periodo = JSON.parse(query.periodo)
 
+    console.log('opereitor: ', req.operador)
+
     function cierre_item(cat, debe, haber, tipo){
         return {categoria: cat, debe, haber, tipo}
     }
