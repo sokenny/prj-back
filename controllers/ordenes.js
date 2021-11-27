@@ -1,6 +1,10 @@
-import mongoose from 'mongoose';
+import { generateMovimientosFromTransferencias } from '../GlobalFunctions.js';
 import Orden from '../models/orden.js';
 import Movimiento from '../models/movimiento.js';
+import Cliente from '../models/cliente.js';
+import Operacion from '../models/operacion.js';
+
+
 
 export const getOrdenes = async (req, res)=>{
 
@@ -25,7 +29,7 @@ export const getOrdenes = async (req, res)=>{
 
 
     try{
-        
+       
         var ordenes = await Orden.find({
                                         tipo: tipo,
                                         fecha_creado:{
@@ -83,31 +87,139 @@ export const getOrdenesHoy = async (req, res)=>{
 
 // }
 
+
+
 export const createOrdenSolo = async (req, res) =>{
 
+
     const ordenes = req.body;
-    
-    try{            
-        // Creamos las ordenes
+    console.log('ordenes:::' , ordenes)
+
+    try{
+
         for (let i = 0; i < ordenes.length; i++) {
-                var orden = ordenes[i];
-                orden.operador = req.operador
-                // orden.operacion = newOperacion._id
-                console.log('se va a crear: ', orden)
-                var newOrden = new Orden(orden)
-                
-                try{
-                    newOrden.save()
-                }catch(error){
-                    console.log('error al crear orden: ', error)
+            let orden = ordenes[i]
+            orden.operador = req.operador
+            
+            if (orden.tipo == 'Saldo') {
+                var clienteToUpdateSaldo = await Cliente.findById(orden.cliente);
+                let saldo_total = clienteToUpdateSaldo.saldo;
+                var operacion_vinculada = await Operacion.findById(orden.operacion);
+                console.log(operacion_vinculada)
+                var newMovimientoSaldo = {
+                    operacion : operacion_vinculada,
+                    monto : orden.usd,
+                    // fecha : new Date()
                 }
+                    
+                saldo_total.push(newMovimientoSaldo)
+                var clienteToUpdateSaldo = await Cliente.findByIdAndUpdate(orden.cliente, { saldo: saldo_total })
+                orden.estado = "Entregada"
             }
 
+            // Si la orden tiene pesos asociados, le creamos un cambio
+            if(orden.ars > 0){
+
+                // TODO sacar esta hardcodeada de abajo porque el cambio global despues se va a traer posta
+                req.body.cambio_global = 155
+
+                let cambio = {
+                    cliente: orden?.cliente,
+                    cliente_borrador: orden?.cliente_borrador,
+                    tipo_operacion: 'Cambio',
+                    tipo_cambio: 'Compra',
+                    monto_enviado: ((orden.ars) / orden.cambio_operacion).toFixed(2),
+                    monto_a_entregar: orden.ars,
+                    cambio_cliente: orden.cambio_operacion,
+                    cambio_prj: req.body.cambio_global,
+                    spread: orden.cambio_operacion - req.body.cambio_global,
+                    operador: req.operador,
+                    estado: 'Pendiente'
+                }
+                let newCambio = await new Operacion(cambio).save()
+                console.log('Nuevo cambio creado: ', newCambio)
+
+            }
+
+            if(orden.tipo == 'Factura'){
+                orden.tipo_orden.factura = {
+                    monto_factura_usd: orden.usd,
+                    monto_factura_ars: orden.ars,
+                }
+            }
+            // if(orden.tipo == 'Cripto'){
+            //     orden.tipo_orden.cripto = {
+            //         comision: orden.tipo_orden.cripto.comision,
+            //         usdt_a_enviar: orden.tipo_orden.cripto.usdt_a_enviar,
+            //         wallet: orden.tipo_orden.cripto.wallet
+            //     }
+            // }
+            var newOrden = new Orden(orden)
+            console.log('newOeden:::' , newOrden)
+            newOrden.save()
             res.status(201).json(newOrden)
-            
+        }
+
     }catch(error){
-        res.status(409).json({message: error.message})
+        console.log('error al crear orden: ', error)
     }
+}
+
+export const editOrdenes = async (req, res) =>{
+
+
+        const ordenes = req.body;
+        console.log('ordenes:::' , ordenes)
+    
+        try{
+    
+            for (let i = 0; i < ordenes.length; i++) {
+                // Si la orden tiene pesos asociados, le creamos un cambio
+                // if(orden.ars > 0){
+    
+                //     let cambio = {
+                //         cliente: orden?.cliente,
+                //         cliente_borrador: orden?.cliente_borrador,
+                //         tipo_operacion: 'Cambio',
+                //         tipo_cambio: 'Compra',
+                //         monto_enviado: ((orden.ars) / orden.cambio_operacion).toFixed(2),
+                //         monto_llega: orden.ars,
+                //         cambio_cliente: null,
+                //         cambio_prj: req.body.cambio_global,
+                //         operador: req.operador,
+                //         estado: 'Pendiente'
+                //     }
+                //     let newCambio = await new Operacion(cambio).save()
+                //     console.log('Nuevo cambio creado: ', newCambio)
+    
+                // }
+    
+                // if(orden.tipo == 'Factura'){
+                //     orden.tipo_orden.factura = {
+                //         monto_factura_usd: orden.usd,
+                //         monto_factura_ars: orden.ars,
+                //     }
+                // }
+                // if(orden.tipo == 'Cripto'){
+                //     orden.tipo_orden.cripto = {
+                //         comision: orden.tipo_orden.cripto.comision,
+                //         usdt_a_enviar: orden.tipo_orden.cripto.usdt_a_enviar,
+                //         wallet: orden.tipo_orden.cripto.wallet
+                //     }
+                // }
+                var newOrdenEdit = new Orden(orden)
+                // var editedOrden = await Orden.findOneAndUpdate( id : newOrdenEdit.operacion._id, {new: true})
+                // var clienteToUpdate = await Orden.findOneAndUpdate(filter, cliente, {new: true})
+
+                console.log('newOeden:::' , newOrdenEdit)
+                // newOrden.save()
+                res.status(201).json(editedOrden)
+            }
+    
+    
+        }catch(error){
+            console.log('error al crear orden: ', error)
+        }
 
 }
 
@@ -117,12 +229,12 @@ export const createFactura = async (req, res) =>{
     const factura = req.body.factura;
 
     var newFactura = new Orden(factura)
-    newFactura.operacion = req.body.operacion
+    newFactura.operacion = req.body.operacionj
     newFactura.cliente = req.body.cliente
 
-    try{            
-                
+    try{
         try{
+            // console.log(newFactura)
             await newFactura.save().then(f => f.populate('operacion').populate('cliente').execPopulate())
         }catch(error){
         }
@@ -141,7 +253,6 @@ export const updateFactura = async (req, res) =>{
     const filter = {_id: factura._id}
 
     var facturaToUpdate = await Orden.findOneAndUpdate(filter, factura, {new: true}).populate('cliente').populate('operacion').exec()
-
 
     try{            
                 
@@ -208,13 +319,13 @@ export const updateCash = async (req, res) =>{
     const cash = req.body;
     const filter = {_id: cash._id}
 
-    var cashToUpdate = await Orden.findOneAndUpdate(filter, cash, {new: true}).populate('cliente').populate('operacion').populate('tipo_orden.cash.proveedor').exec()
-
-    console.log('cash actualizada desde el controlador: ', cashToUpdate)
-
+    
+    
     try{            
-                
+
+        var cashToUpdate = await Orden.findOneAndUpdate(filter, cash, {new: true}).populate('cliente').populate('operacion').populate('tipo_orden.cash.proveedor').exec()
         res.status(201).json(cashToUpdate)
+        console.log('cash actualizada desde el controlador: ', cashToUpdate)
             
     }catch(error){
         res.status(409).json({message: error.message})
@@ -241,5 +352,21 @@ export const setListas = async (req, res) =>{
 
     console.log('updated listas ords: ', updatedOrdenes)
 
+
+}
+
+export const liquidarTransferencias = async (req, res) =>{
+
+    const data = req.body
+    let movimientos = generateMovimientosFromTransferencias(data)
+    try {
+        for(let movimiento of movimientos){
+            const newMovimiento = new Movimiento(movimiento);
+            newMovimiento.save();
+        }
+        res.status(201).json({error: 0})
+    }catch(error){
+        res.status(409).json({error: 1, message: error.message})
+    }
 
 }

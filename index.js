@@ -31,16 +31,16 @@ app.use(cors({
 
 // A esta ruta no le pasamos el middleware de verifyToken porque contiene la funcion "login" para la cual no se requiere el token
 app.use('/users', userRoutes)
-app.use('/posts', verifyToken,   postRoutes)
-app.use('/clientes', verifyToken,  clienteRoutes)
-app.use('/operaciones', verifyToken,  operacionesRoutes)
-app.use('/proveedores', verifyToken,  proveedoresRoutes)
-app.use('/cuentas', verifyToken,  cuentasRoutes)
-app.use('/ordenes', verifyToken,  ordenesRoutes)
-app.use('/movimientos', verifyToken,  movimientosRoutes)
-app.use('/globales', verifyToken,  globalesRoutes)
-app.use('/reportes', verifyToken,  reportesRoutes)
-app.use('/cierre', verifyToken,  cierreRoutes)
+app.use('/posts', verifyToken,  postRoutes)
+app.use('/clientes', verifyToken, clienteRoutes)
+app.use('/operaciones', verifyToken, operacionesRoutes)
+app.use('/proveedores', verifyToken, proveedoresRoutes)
+app.use('/cuentas', verifyToken, cuentasRoutes)
+app.use('/ordenes', verifyToken, ordenesRoutes)
+app.use('/movimientos',  movimientosRoutes)
+app.use('/globales', verifyToken, globalesRoutes)
+app.use('/reportes', verifyToken, reportesRoutes)
+app.use('/cierre', verifyToken, cierreRoutes)
 app.use('/config', configRoutes)
 
 const CONNECTION_URL = 'mongodb://juanchaher:juanchaher123@cluster0-shard-00-00.67rpn.mongodb.net:27017,cluster0-shard-00-01.67rpn.mongodb.net:27017,cluster0-shard-00-02.67rpn.mongodb.net:27017/myFirstDatabase?ssl=true&replicaSet=atlas-74rwgc-shard-0&authSource=admin&retryWrites=true&w=majority'

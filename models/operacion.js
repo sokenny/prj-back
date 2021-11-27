@@ -25,6 +25,7 @@ const operacionSchema = mongoose.Schema({
     proveedor: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },
     cuenta_destino: { type: mongoose.Schema.Types.ObjectId, ref: 'Cuentas', required: false },
     comision_proveedor: Number,
+    comision_proveedor_cantidad: Number,
     comision_prj: Number,
     comision_prj_cantidad: Number,
     monto_a_entregar: Number,
@@ -32,12 +33,11 @@ const operacionSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
-    // ordenes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: true }],
-    cambio_cliente: Number,
     ganancia_prj : Number,
     spread: Number,
     estado: String,
     nota: String,
+    como_recibe: String,
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     fecha_creado: {
         type: Date,

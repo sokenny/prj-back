@@ -6,17 +6,10 @@ import Operacion from '../models/operacion.js';
 
 import { getBalancesCajas } from './reportes.js';
 
-// export const getExistencia = async(req, res)=>{
-//     console.log('trap es tu gato')
-// }
-
 export const getBalancesProveedores = async (periodo)=>{
-
-    
+   
     try{
-
         var balances_proveedores = await Movimiento.aggregate([
-
                                                 {$match: {
                                                     proveedor: {$ne: null},
                                                     fecha_creado:{
@@ -24,31 +17,21 @@ export const getBalancesProveedores = async (periodo)=>{
                                                         $lt: new Date (periodo.to)
                                                     }
                                                 }},
-                                                
                                                { $group : {
                                                     _id : "$proveedor",
                                                     total : {
                                                         $sum : "$importe" 
                                                     }
                                                 }},
-                                            
                                                 { $lookup: {from: 'proveedores', localField: '_id', foreignField: '_id', as: 'proveedor'} },
                                                 {$sort: {_id:1}}
-                                                    
                                                 ])
-
         return balances_proveedores
-
         // res.status(200).json(cajas)
-
-
     }catch(error){
         console.log(error)
         // res.status(400).json({message: "An error occured"})
-
     }
-
-
 }
 
 export const getFaltaPagarFacturas = async (periodo) =>{
@@ -97,7 +80,6 @@ export const getFaltaPagarCrypto = async (periodo) =>{
                     $gte: new Date(periodo.from),
                     $lt: new Date (periodo.to)
                 }
-                // "": "Crypto",
             }},
             { $group : {
                 _id : "$operacion",
@@ -106,21 +88,6 @@ export const getFaltaPagarCrypto = async (periodo) =>{
                 }
             }},
             { $lookup: {from: 'operaciones', localField: '_id', foreignField: '_id', as: 'operacion'} },
-            // {
-            //     $project: 
-            //     {
-            //       operacion: 
-            //       { 
-            //         $filter: 
-            //         { 
-            //           input: "$operacion", 
-            //           as: "op", 
-            //           cond: { $gte: [ "$$op.tipo_operacion", "Crypto" ] } 
-            //         } 
-            //       } 
-            //     } 
-            //   } ,
-
             
         ])
 
@@ -152,7 +119,6 @@ export const getFaltaPagarBajadas = async (periodo) =>{
                     $gte: new Date(periodo.from),
                     $lt: new Date (periodo.to)
                 }
-                // "": "bajadas",
             }},
             { $group : {
                 _id : "$operacion",
@@ -199,10 +165,8 @@ export const getExistencia = async (req,res) => {
         return {categoria: cat, usd, ars, eur}
     }
 
-
     var existencia = []
 
-    
     Promise.all([getBalancesCajas(req,res, false), getBalancesProveedores(periodo), getFaltaPagarFacturas(periodo), getFaltaPagarCrypto(periodo), getFaltaPagarBajadas(periodo)]).then((results)=>{
 
         console.log('resukts: ', results)
@@ -225,7 +189,7 @@ export const getExistencia = async (req,res) => {
         }
 
         let falta_facturas = results[2]
-        existencia.push(existencia_item("Falta Fts.", falta_facturas[0].total, "", ""))
+        existencia.push(existencia_item("Falta Fts.", falta_facturas[0]?.total, "", ""))
         
         let falta_crypto = results[3]
         existencia.push(existencia_item("Falta Crypto", falta_crypto, "", ""))
@@ -237,46 +201,8 @@ export const getExistencia = async (req,res) => {
         res.status(200).json({existencia})
 
     })
-
-    
-    
-
 }
 
-
-export const getCierreTable = async (req,res) => {
-
-        // const query = req.query
-        // const periodo = JSON.parse(query.periodo)
-    
-        console.log('LEOOOONIDAAAAAAAAAAAAAAAAAAAAAAAAAAS',req.body)
-
-        // var tipo =  query.tipo;
-        // if(query.tipo === ''){
-        //     tipo = {
-        //         $exists: true
-        //         }
-        // }
-    
-        // try{
-    
-        //     var ordenes = await Orden.count({fecha_creado:{
-        //         $gte: periodo.from,
-        //         $lt: periodo.to
-        //     }})
-        //     var operaciones = await Operacion.count({fecha_creado:{
-        //         $gte: periodo.from,
-        //         $lt: periodo.to
-        //     }})
-            
-    
-            // res.status(200).json(operaciones, ordenes)
-            res.status(200).json('LEONIDAAAAAAAAAAAS')
-            
-        // }catch(error){
-        //     res.status(404).json({message: error.message})
-        // }
-    }
     
 // Funciones para tabla cierre
 export const getGananciaOperaciones = async (periodo) =>{
@@ -314,41 +240,12 @@ export const getGananciaOperaciones = async (periodo) =>{
 
 }
 
-// export const getGananciaFacturas = async ()=>{
-
-//     try{
-
-//         var ganancia_facturas = await Orden.aggregate([
-
-//             {$match:{
-//                 tipo: "Factura",
-//                 // estado: {$ne: "Pagado"}
-//             }},
-
-//             { $group : {
-//                 _id : "$tipo",
-//                 total : {
-//                     $sum : "$tipo_orden.factura.monto_factura_usd_comision" 
-//                 }
-//             }},
-
-//         ])
-
-//         return ganancia_facturas   
-
-//     }catch(error){
-
-//     }
-
-// }
-
 export const getCatMovCajas = async (periodo) =>{
 
     try{
 
         var ganancia_bajadas = await MovimientoCaja.aggregate([
             {$match: {
-                // tipo: 0,
                 categoria : {$ne: null},
                 fecha_creado:{
                     $gte: new Date(periodo.from),
@@ -378,20 +275,13 @@ export const getCierre = async (req,res) =>{
     const query = req.query
     const periodo = JSON.parse(query.periodo)
 
-    console.log('opereitor: ', req.operador)
-
     function cierre_item(cat, debe, haber, tipo){
         return {categoria: cat, debe, haber, tipo}
     }
 
 
     var cierre_prj = []
-
-    
     Promise.all([getGananciaOperaciones(periodo), getCatMovCajas(periodo)]).then((results)=>{
-
-        console.log('results: ', results)
-
         let ganancias_bajadas = results[0]
         for(let g in ganancias_bajadas){
             let ganancia = ganancias_bajadas[g]

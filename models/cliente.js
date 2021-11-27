@@ -21,7 +21,19 @@ const clienteSchema = mongoose.Schema({
     fecha_creado: {
         type: Date,
         default: new Date()
-    }
+    },
+    saldo : Array
+    // [
+    //     { 
+    //         operacion : {
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: 'Operacion',
+    //             required: false 
+    //         },
+    //         monto : Number
+    //     }
+    // ] 
+
 
 })
 

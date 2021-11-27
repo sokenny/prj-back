@@ -3,6 +3,7 @@ import Orden from '../models/orden.js';
 import Operacion from '../models/operacion.js';
 import Cliente from '../models/cliente.js';
 import MovimientoCaja from '../models/movimiento_caja.js';
+import { getCajasDataStructure } from '../GlobalFunctions.js';
 
 export const getAll = async (req, res)=>{
 
@@ -40,7 +41,6 @@ export const getAll = async (req, res)=>{
 }
 
 export const getBalancesCajas = async (req, res, return_res=true)=>{
-    console.log('Trap es tu vieja')
 
     const query = req.query
     const periodo = JSON.parse(query.periodo)
@@ -88,36 +88,20 @@ export const getBalancesCajas = async (req, res, return_res=true)=>{
                                                         
                                                     ]) 
 
-        var cajas = {}
-        // Creando el array de cajas de manera dinámica
+        var cajas = getCajasDataStructure()
+        
         for(let i in ingresos){
             let ingreso = ingresos[i]
-
-            if(cajas[ingreso._id[1]] === undefined){
-                cajas[ingreso._id[1]] = {}
-                if(cajas[ingreso._id[1]][ingreso._id[0]] === undefined){
-                    cajas[ingreso._id[1]][ingreso._id[0]] = {}
-                    cajas[ingreso._id[1]][ingreso._id[0]].ingresos = ingreso.total
-                }
-            }else{
-                if(cajas[ingreso._id[1]][ingreso._id[0]] === undefined){
-                    cajas[ingreso._id[1]][ingreso._id[0]] = {}
-                    cajas[ingreso._id[1]][ingreso._id[0]].ingresos = ingreso.total
-                }
-            }
-            
+            cajas[ingreso._id[1]][ingreso._id[0]].ingresos = ingreso.total
         }
 
         for(let e in egresos){
-
             let egreso = egresos[e]
             cajas[egreso._id[1]][egreso._id[0]].egresos = egreso.total
-
         }
 
         for(let o in cajas){
             let oficina = cajas[o]
-
             for(let c in oficina){
                 let caja = oficina[c]
                 cajas[o][c].balance = caja.ingresos - caja.egresos

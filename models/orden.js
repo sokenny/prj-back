@@ -20,37 +20,61 @@ const cash = new Schema({
     monto_envio: Number,
     proveedor: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },    
 });
+const cripto = new Schema({
+    comision: Number,
+    wallet: String,
+    usdt_a_enviar: {
+        type: Number,
+        default: 0
+    }    
+});
+const saldo = new Schema({
+    monto: Number
+});
+const deposito = new Schema({
+    banco: String,
+    nro_cuenta: Number,
+    titular: String,
+    tipo_cuenta: String,
+    cbu: Number,
+    alias: String,
+});
+const transferencia = new Schema({
+    banco: String,
+    nro_cuenta: Number,
+    titular: String,
+    tipo_cuenta: String,
+    cbu: Number,
+    alias: String,
+});
+const moto = new Schema({
+    // encargado: String,
+    provincia: String,
+    localidad: { 
+        type: String,
+        default: ''
+    },
+    direccion: String,
+    cp : { 
+        type: String,
+        default: ''
+    },
+    depto: String,
+});
+
 
 
 const tipo_orden = new Schema({
     factura: factura,
-    cash: cash    
+    cash: cash,
+    cripto: cripto,
+    saldo : saldo,
+    deposito: deposito,
+    moto: moto,
+    transferencia : transferencia
 });
 
 const ordenSchema = mongoose.Schema({
-
-    // operacion: { 
-    //     type: mongoose.Schema.Types.ObjectId,
-    //     ref: 'Operaciones',
-    //     required: true 
-    // },
-    // divisa: String,
-    // tipo: String,
-    // monto: Number,
-    // estado: String,
-    // localidad: String,
-    // domicilio: String,
-    // provincia: String,
-    // banco: String,
-    // nro_cuenta: Number,
-    // titular: String,
-    // tipo_cuenta: String,
-    // cbu: Number,
-    // alias: String,
-    // fecha_creado: {
-    //     type: Date,
-    //     default: new Date()
-    // }
 
 
     operacion: { 
@@ -59,10 +83,9 @@ const ordenSchema = mongoose.Schema({
         default: null
     },
 
-    cliente : { 
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Clientes',
-    },
+    cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'Clientes', required: false },
+    cliente_borrador: String,
+    cliente_nombre: String,
 
     a_entregar: {
         monto: Number,
@@ -74,32 +97,14 @@ const ordenSchema = mongoose.Schema({
 
     tipo: String,
     oficina: String,
-    estado: { type: String},
-
+    estado: { 
+        type: String,
+        default: 'Pendiente'
+    },
+    
     // Dentro de este objeto, van objetos con los campos propios de cada tipo de orden
     tipo_orden: tipo_orden,
-    
 
-    // envio:{
-        encargado: String,
-        provincia: String,
-        localidad: { 
-            type: String,
-            default: ''
-        },
-        direccion: String,
-        cp : String,
-        depto: String,
-    // },
-
-    // banco:{
-        banco: String,
-        nro_cuenta: Number,
-        titular: String,
-        tipo_cuenta: String,
-        cbu: Number,
-        alias: String,
-    // },
     nota: String,
     fav_status:{
         type: Number,

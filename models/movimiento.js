@@ -8,7 +8,7 @@ const movimientoSchema = mongoose.Schema({
     importe: Number,
     origen: String,
     comision:Number,
-    estado:String,
+    estado: String,
     nota: String,
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     fecha_creado: {

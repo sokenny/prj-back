@@ -13,6 +13,7 @@ const movimientoCajaSchema = mongoose.Schema({
         default: 0
     },
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
+    binded_orden: { type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: false },
     fecha_creado: {
         type: Date,
         default: new Date()
