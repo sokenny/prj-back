@@ -48,21 +48,12 @@ export const getUserFromToken = (req, res) =>{
                 res.end();
                 
             }else{
-                
-                
-                console.log('authdata:' , authData)
                 res.json(authData.user[0])
-                    
-                    
-                }
-            })
-            
-            
-        }else{
-           
-          res.json({error: "auth failed"})
-          res.end();
-        
+            }
+        })  
+    }else{
+        res.json({error: "auth failed"})
+        res.end();
     }
 
 }

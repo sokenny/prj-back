@@ -4,11 +4,9 @@ const cuentaSchema = mongoose.Schema({
 
     proveedor: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },
     nombre: String,
-    fecha_creado: {
-        type: Date,
-        default: new Date()
-    }
-
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
 })
 
 const Cuenta = mongoose.model('Cuentas', cuentaSchema);

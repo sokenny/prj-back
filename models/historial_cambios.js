@@ -7,11 +7,9 @@ const historialCambiosSchema = mongoose.Schema({
         type: String,
         default: new Date().toISOString().split('T')[0]
     },
-    fecha_creado: {
-        type: Date,
-        default: new Date()
-    }
-
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
 })
 
 const HistorialCambios = mongoose.model('HistorialCambios', historialCambiosSchema);

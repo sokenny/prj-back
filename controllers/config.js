@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import Config from '../models/config.js';
 import Operacion from '../models/operacion.js';
 import HistorialCambios from '../models/historial_cambios.js';
@@ -18,10 +17,7 @@ export const getConfig = async (req, res) =>{
 export const updateConfig = async (req, res) =>{
 
     const config = req.body;
-    console.log('llega: ', config)
     let configUpdate = await Config.findOneAndUpdate({}, config, {new: true})
-
-    console.log('updateado: ', configUpdate)
 
     try{                            
         res.status(201).json(configUpdate)
@@ -33,41 +29,39 @@ export const updateConfig = async (req, res) =>{
 
 export const getCambioDia = async (req, res, return_res=true) => {
 
-    let cambios = await Operacion.find({tipo_operacion: 'Cambio', tipo_cambio: 'Compra', fecha_creado:{$gte: '2021-01-14',$lt: '2021-11-25'}})
-    cambios = []
-
-    let ayer_00 = new Date();
-    ayer_00.setDate(ayer_00.getDate()-1)
-    let ayer_string = ayer_00.toISOString().split('T')[0]
-    ayer_00 = new Date(ayer_string)
-
-    let ars_ayer = cambios.filter(cambio => (cambio.fecha_creado >  ayer_00 && cambio.fecha_creado < new Date(new Date().toISOString().split('T')[0]) && cambio.estado === "Pendiente" ))
-    ars_ayer = ars_ayer.reduce((total_ars, cambio) => total_ars + cambio.monto_enviado, 0)
+    let new_date = new Date();
+    new_date.setDate(new_date.getDate()-1)
+    const AYER_STRING = new_date.toISOString().split('T')[0]
+    const AYER_00 = new Date(AYER_STRING)
+    const AYER_21HS = new Date(new Date().toISOString().split('T')[0])
     
-    // Consultamos cambio de ayer
-    let historial_cambios = await HistorialCambios.find({dia: ayer_string})
-    let cambio_ayer = parseFloat(historial_cambios[0].cambio.toFixed(2))
+    const cambios_compra_ayer_y_hoy = await Operacion.find({tipo_operacion: 'Cambio', tipo_cambio: 'Compra', fecha_creado:{$gte: AYER_STRING}})
+    const cambios_compra_hoy = cambios_compra_ayer_y_hoy.filter((cambio)=>cambio.fecha_creado > AYER_21HS)
+    const cambios_compra_ayer = cambios_compra_ayer_y_hoy.filter((cambio)=>cambio.fecha_creado > AYER_00 && cambio.fecha_creado < AYER_21HS)
 
+    let cambios_compra_pendientes = cambios_compra_ayer.filter(cambio => (cambio.estado === "Pendiente" ))
+    const ars_ayer = cambios_compra_pendientes.reduce((total_ars, cambio) => total_ars + cambio.monto_enviado, 0)
+    
+    let ultimo_cambio_registrado = await HistorialCambios.findOne().sort({fecha_creado: 'desc'}).exec()
+    ultimo_cambio_registrado = parseFloat(ultimo_cambio_registrado?.cambio.toFixed(2))
 
-    let cambios_hoy = cambios
-    let usd_hoy = cambios_hoy.filter(cambio => cambio.tipo_cambio == "Compra")   
+    const usd_hoy = cambios_compra_hoy.filter(cambio => cambio.tipo_cambio == "Compra")   
     
     const cambio_usd_suma = usd_hoy.reduce((cambio_usd_suma, usd) => cambio_usd_suma + (usd.monto_enviado/usd.cambio_cliente), 0);
-
     const cambio_ars_suma = usd_hoy.reduce((cambio_ars_suma, usd) => cambio_ars_suma + usd.monto_enviado, 0);
+
+    function calculateCambio(){
+        return parseFloat(((cambio_ars_suma + ars_ayer) / (cambio_usd_suma + ( ars_ayer / ultimo_cambio_registrado) )).toFixed(2));
+    }
         
-    let cambio = parseFloat(((cambio_ars_suma + ars_ayer) / (cambio_usd_suma + ( ars_ayer / cambio_ayer) )).toFixed(2));
+    const cambio = calculateCambio()
 
     var cambio_to_return = cambio
 
     // Si hoy no hay cambios, devolvemos el cambio de ayer
-    if(cambios.length<1){
-
-        console.log('no hay cambios apara hoy', cambio_ayer)
-        cambio_to_return = cambio_ayer
-    
+    if(cambios_compra_ayer_y_hoy.length<1){
+        cambio_to_return = ultimo_cambio_registrado
     }
-
 
     if(return_res){  
         try{                            
@@ -83,15 +77,15 @@ export const getCambioDia = async (req, res, return_res=true) => {
 
 export const setCambioDia = async (req, res) => {
 
-    let cambio = await getCambioDia(req, res, false)
+    const cambio = await getCambioDia(req, res, false)
 
     let historial_cambios_item = {cambio, dia: new Date().toISOString().split('T')[0]}
     var message = "";
 
-    let this_day = await HistorialCambios.find({dia: new Date().toISOString().split('T')[0]})
-    if(this_day.length < 1){
-        var new_cambio = new HistorialCambios(historial_cambios_item)
-        await new_cambio.save()
+    const cambio_registrado_hoy = await HistorialCambios.find({dia: new Date().toISOString().split('T')[0]})
+    if(cambio_registrado_hoy.length < 1){
+        const nuevo_cambio_a_registrar = new HistorialCambios(historial_cambios_item)
+        await nuevo_cambio_a_registrar.save()
         message = "Cambio insertado con éxito."
     }else{
         message = "Ya existe un registro de cambio con la fecha de hoy."
@@ -108,12 +102,7 @@ export const setCambioDia = async (req, res) => {
 export const getHistorialCambios = async (req, res) => {
 
     const data = req.params
-
-    console.log('data que llega: ', data)
-
     let historial_cambios = await HistorialCambios.find().limit(data.limit).sort({fecha_creado: 'desc'});
-
-    console.log('historial cambios: ', historial_cambios)
 
     try{                            
         res.status(201).json(historial_cambios)

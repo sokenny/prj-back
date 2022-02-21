@@ -1,14 +1,9 @@
 import mongoose from 'mongoose'
 
-import moment from 'moment-timezone'
-const currentLocalDate = moment.tz(Date.now(), "America/Argentina/Buenos_Aires");
-
-console.log('Current local!', currentLocalDate)
-
 const operacionSchema = mongoose.Schema({
-
     cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'Clientes', required: false },
     cliente_borrador: String,
+    proveedor_as_cliente: { type: mongoose.Schema.Types.ObjectId, ref: 'Proveedores', required: false },
     tipo_operacion: String,
     tipo_envia: String,
     corroborar: {type: Boolean, default: false},
@@ -38,12 +33,17 @@ const operacionSchema = mongoose.Schema({
     estado: String,
     nota: String,
     como_recibe: String,
+    fecha_entrega: {
+        type: String,
+        default: null
+    },
+    oficina: String,
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
-    fecha_creado: {
-        type: Date,
-        default: currentLocalDate
-    }
-
+    fecha_recibe: String,
+    oficina : String,
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
 })
 
 const Operacion = mongoose.model('Operaciones', operacionSchema);

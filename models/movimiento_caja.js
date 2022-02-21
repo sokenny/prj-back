@@ -14,11 +14,10 @@ const movimientoCajaSchema = mongoose.Schema({
     },
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     binded_orden: { type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: false },
-    fecha_creado: {
-        type: Date,
-        default: new Date()
-    }
 
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
 })
 
 const MovimientoCaja = mongoose.model('MovimientosCajas', movimientoCajaSchema);

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import Cuenta from '../models/cuenta.js';
 
 export const getCuentas = async (req, res)=>{

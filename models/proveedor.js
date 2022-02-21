@@ -6,11 +6,9 @@ const proveedorSchema = mongoose.Schema({
     divisa: String,
     fee: Number,
     cuentas: [String],
-    fecha_creado: {
-        type: Date,
-        default: new Date()
-    }
-
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
 })
 
 const Proveedor = mongoose.model('Proveedores', proveedorSchema);

@@ -1,4 +1,3 @@
-import mongoose from 'mongoose';
 import Movimiento from '../models/movimiento.js';
 import MovimientoCaja from '../models/movimiento_caja.js';
 import Orden from '../models/orden.js';
@@ -39,12 +38,9 @@ export const getFaltaPagarFacturas = async (periodo) =>{
     try{
 
         var falta_facturas = await Orden.aggregate([
-            // {$match:{
-            //     tipo: "Factura",
-            // }},
             {$match:{
                 tipo: "Factura",
-                estado: {$ne: "Pagado"},
+                estado: {$ne: "Entregada"},
                 fecha_creado:{
                     $gte: new Date(periodo.from),
                     $lt: new Date (periodo.to)
@@ -74,7 +70,7 @@ export const getFaltaPagarCrypto = async (periodo) =>{
 
         var falta_crypto = await Orden.aggregate([
             {$match: {
-                estado: {$ne: ["Entregada", "Pagado"]},
+                estado: {$ne: ["Entregada"]},
                 tipo: {$ne: "Factura"},
                 fecha_creado:{
                     $gte: new Date(periodo.from),
@@ -113,7 +109,7 @@ export const getFaltaPagarBajadas = async (periodo) =>{
 
         var falta_bajadas = await Orden.aggregate([
             {$match: {
-                estado: {$nin: ["Entregada", "Pagado"]},
+                estado: {$nin: ["Entregada"]},
                 tipo: {$ne: "Factura"},
                 fecha_creado:{
                     $gte: new Date(periodo.from),
@@ -167,12 +163,9 @@ export const getExistencia = async (req,res) => {
 
     var existencia = []
 
-    Promise.all([getBalancesCajas(req,res, false), getBalancesProveedores(periodo), getFaltaPagarFacturas(periodo), getFaltaPagarCrypto(periodo), getFaltaPagarBajadas(periodo)]).then((results)=>{
+    Promise.all([getBalancesCajas(req,res,true), getBalancesProveedores(periodo), getFaltaPagarFacturas(periodo), getFaltaPagarCrypto(periodo), getFaltaPagarBajadas(periodo)]).then((results)=>{
 
-        console.log('resukts: ', results)
-        
         let balances_cajas = results[0]
-        console.log('BACA: ', balances_cajas)
         for(let o in balances_cajas){
             if(o !== "null"){
                 let oficina = balances_cajas[o]
@@ -207,8 +200,6 @@ export const getExistencia = async (req,res) => {
 // Funciones para tabla cierre
 export const getGananciaOperaciones = async (periodo) =>{
 
-    console.log('perico: ', periodo)
-
     try{
 
         var ganancia_operaciones = await Operacion.aggregate([
@@ -228,8 +219,6 @@ export const getGananciaOperaciones = async (periodo) =>{
             
                         
         ])
-
-        console.log('gaops: ', ganancia_operaciones)
 
         return ganancia_operaciones
 
@@ -261,7 +250,6 @@ export const getCatMovCajas = async (periodo) =>{
                         
         ])
 
-        console.log('gaba. ', ganancia_bajadas)
         return ganancia_bajadas
 
     }catch(error){

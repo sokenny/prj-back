@@ -1,12 +1,9 @@
-import mongoose from 'mongoose';
 import Proveedor from '../models/proveedor.js';
 import Cuenta from '../models/cuenta.js';
 
 export const getProveedores = async (req, res)=>{
     try{
         const proveedores = await Proveedor.find().sort({fecha_creado: 'desc'});
-        
-        console.log('ops', proveedores);
         res.status(200).json(proveedores)
         
     }catch(error){
@@ -24,15 +21,10 @@ export const createProveedor = async(req, res) =>{
     try{
         await newProveedor.save().then(() => {
 
-            // Creamos las cuentas
             for (let i = 0; i < cuentas.length; i++) {
-                    
                 var cuenta = cuentas[i];
                 cuenta.proveedor = newProveedor._id
                 var newCuenta = new Cuenta(cuenta)
-                
-                console.log('Cuenta: ', cuenta)
-                
                 try{
                     newCuenta.save()
                 }catch(error){
@@ -42,7 +34,7 @@ export const createProveedor = async(req, res) =>{
 
         })
 
-        res.status(201).json(newProveedor, cuentas)
+        res.status(201).json({newProveedor, cuentas})
     }catch(error){
         console.log(error)
         res.status(409).json({message: error.message})
@@ -63,7 +55,6 @@ export const updateProveedor = async (req, res) =>{
                     
             var cuenta = cuentas[i];
             if(cuenta.id_temp){
-                console.log('Hay que crear: ', cuenta)
                 cuenta.proveedor = proveedor._id
                 var newCuenta = new Cuenta(cuenta)
                 
@@ -76,8 +67,6 @@ export const updateProveedor = async (req, res) =>{
         }
 
     })
-
-    console.log('proveedor actualizado desde el controlador: ', proveedorToUpdate)
 
     try{            
                 

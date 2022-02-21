@@ -8,5 +8,4 @@ router.get('/', getProveedores)
 router.post('/', createProveedor)
 router.patch('/', updateProveedor)
 
-
 export default router

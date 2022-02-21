@@ -18,24 +18,11 @@ const clienteSchema = mongoose.Schema({
         default: 0
     },
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
-    fecha_creado: {
-        type: Date,
-        default: new Date()
-    },
-    saldo : Array
-    // [
-    //     { 
-    //         operacion : {
-    //             type: mongoose.Schema.Types.ObjectId,
-    //             ref: 'Operacion',
-    //             required: false 
-    //         },
-    //         monto : Number
-    //     }
-    // ] 
-
-
-})
+},
+{
+    timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }
+}
+)
 
 const Cliente = mongoose.model('Clientes', clienteSchema);
 
