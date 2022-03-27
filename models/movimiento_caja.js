@@ -1,7 +1,6 @@
 import mongoose from 'mongoose'
 
 const movimientoCajaSchema = mongoose.Schema({
-
     importe: Number,
     descripcion: String,
     categoria: String,
@@ -12,9 +11,10 @@ const movimientoCajaSchema = mongoose.Schema({
         type: Number,
         default: 0
     },
+    operacion: { type: mongoose.Schema.Types.ObjectId, ref: 'Operaciones', required: false },
+    orden: { type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: false },
     operador: { type: mongoose.Schema.Types.ObjectId, ref: 'Users', required: false },
     binded_orden: { type: mongoose.Schema.Types.ObjectId, ref: 'Ordenes', required: false },
-
 },
 {
     timestamps: { createdAt: 'fecha_creado', updatedAt: 'fecha_actualizado' }

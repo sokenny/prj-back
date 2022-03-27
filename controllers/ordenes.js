@@ -75,10 +75,8 @@ export const createOrdenSolo = async (req, res) =>{
             }).execPopulate());
 
             responseArr.push(newOrden);
-            console.log(newOrden, responseArr)
         }
 
-        console.log('response arr: ', responseArr)
         res.status(201).json(responseArr)
 
     }catch(error){
@@ -116,7 +114,7 @@ export const editOrdenes = async (req, res) =>{
 
 export const createFactura = async (req, res) =>{
     req.body.factura.operador = req.operador
-    const factura = req.body.factura;
+    const factura = {...req.body.factura, ars: req.body.factura.tipo_orden.factura.monto_factura_ars};
     var newFactura = new Orden(factura)
     try{
         newFactura = await newFactura.save().then(f => 
@@ -146,7 +144,7 @@ export const deleteOrden = async (req, res)=>{
 
 export const createCash = async (req, res) =>{
     req.body.cash.operador = req.operador
-    const cash = req.body.cash;
+    const cash = {...req.body.cash, usd: req.body.cash.tipo_orden.cash.monto_cliente};
     console.log('controller createcash: ', cash)
     var newCash = new Orden(cash)
     newCash.operacion = req.body.operacion

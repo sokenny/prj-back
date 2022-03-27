@@ -55,11 +55,10 @@ export const getCambioDia = async (req, res, return_res=true) => {
     }
         
     const cambio = calculateCambio()
-
     var cambio_to_return = cambio
 
     // Si hoy no hay cambios, devolvemos el cambio de ayer
-    if(cambios_compra_ayer_y_hoy.length<1){
+    if(cambio_usd_suma === 0 && cambio_ars_suma === 0){
         cambio_to_return = ultimo_cambio_registrado
     }
 
@@ -70,9 +69,7 @@ export const getCambioDia = async (req, res, return_res=true) => {
             res.status(409).json({message: error.message})
         }
     }
-
     return cambio_to_return
-
 }
 
 export const setCambioDia = async (req, res) => {

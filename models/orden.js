@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 
 const factura = new Schema({
     forma_de_pago: String,
+    tipo_factura: String,
     monto_factura_ars: Number,
     monto_factura_usd: Number,
     monto_factura_ars_comision: Number,
@@ -76,7 +77,7 @@ const ordenSchema = mongoose.Schema({
     operacion: { 
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Operaciones',
-        default: null
+        required: true
     },
     a_entregar: {
         monto: Number,

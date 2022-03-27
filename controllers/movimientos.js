@@ -4,7 +4,7 @@ import {Parser} from 'json2csv';
 
 export const getMovimientos = async (req, res)=>{
     try{
-        const movimientos = await Movimiento.find().populate('proveedor').populate('cuenta_destino').sort({fecha_creado: 'desc'}).exec();
+        const movimientos = await Movimiento.find().populate('proveedor').populate('cuenta_destino').populate('operacion').populate('orden').sort({fecha_creado: 'desc'}).exec();
         res.status(200).json(movimientos)
     }catch(error){
         res.status(404).json({message: error.message})
@@ -14,7 +14,7 @@ export const getMovimientos = async (req, res)=>{
 export const createMovimientoProveedor = async(req, res) =>{
     
     var movimientoProveedor = req.body;
-    
+
     if(movimientoProveedor.importe<=-1){
         movimientoProveedor.origen == null;    
         movimientoProveedor.cuenta_destino == null;    
@@ -41,10 +41,12 @@ export const deleteMovimientoProveedor = async (req, res)=>{
 }
 
 export const createMovimientoCaja = async(req, res) =>{
-    var movimientoCaja = req.body;
-    var newMovimientoCaja = new MovimientoCaja(movimientoCaja);
+    const movimientoCaja = req.body;
+    console.log('mov caja a crear: ', movimientoCaja)
+    const newMovimientoCaja = new MovimientoCaja(movimientoCaja);
     try{
-        await newMovimientoCaja.save()    
+        await newMovimientoCaja.save()  
+        console.log('mov created: ', newMovimientoCaja)  
         res.status(201).json({newMovimientoCaja})
     }catch(error){
         console.log(error)
@@ -66,7 +68,7 @@ export async function findMovimientosCajaWithFilters(req, res){
 
 export const getMovimientosCajas = async (req, res)=>{
     try{
-        const movimientosCajas = await MovimientoCaja.find().sort({fecha_creado: 'desc'});
+        const movimientosCajas = await MovimientoCaja.find().populate('operacion').populate('orden').sort({fecha_creado: 'desc'});
         res.status(200).json(movimientosCajas)
     }catch(error){
         res.status(404).json({message: error.message})

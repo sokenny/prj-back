@@ -20,17 +20,17 @@ export const isPesos = (transferencia) => {
     return (transferencia.ars > 0 && transferencia.usd < 1)
 }
 
+function getNombreYIdOrd(movimiento) {
+    return movimiento.operacion.cliente?.nombre + " - Ord (" + movimiento._id+")"
+}
+
 export const generateMovimientosFromTransferencias = (data) => {
-
     const movimientos = []
-
     for(let transferencia of data.transferencias){
-        let movimiento = {proveedor: data.proveedor._id, estado: estados.movimientos_proveedor[0], cuenta_destino: data.cuenta_destino, origen: `Orden ${transferencia._id}`}
+        let movimiento = {proveedor: data.proveedor._id, estado: estados.movimientos_proveedor[0], cuenta_destino: data.cuenta_destino, origen:  getNombreYIdOrd(transferencia), orden: transferencia._id }
         let importe;
         if (transferencia.recibo === false) {
             if(isPesos(transferencia)){
-                console.log('Importe: ', transferencia.ars)
-                console.log(transferencia)
                 importe = transferencia.ars * (-1)
             }else{
                 importe = transferencia.usd * (-1)
@@ -41,7 +41,6 @@ export const generateMovimientosFromTransferencias = (data) => {
         }else{
                 importe = transferencia.operacion.monto_llega
         }
-        console.log('IMPORTE2:: ', importe)
         movimiento.importe = importe
         movimientos.push(movimiento)
     }
