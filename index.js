@@ -23,7 +23,7 @@ process.env.TZ = "America/Argentina/Buenos_Aires";
 app.use(bodyParser.json({limit: "30mb", extended: true}))
 app.use(bodyParser.urlencoded({limit: "30mb", extended: true}))
 app.use(cors({
-    origin: 'https://fervent-lamport-727df5.netlify.app'
+    origin: 'https://prj-software.herokuapp.com'
 }));
 
 app.use('/users', userRoutes)
